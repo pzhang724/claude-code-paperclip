@@ -1,0 +1,77 @@
+{
+  "id": "01-estimand-trend",
+  "title": "How often do FDA documents mention 'estimand' over time?",
+  "subtitle": "Quantitative regulatory trend analysis",
+  "audience_tags": ["biostatistician", "regulatory"],
+  "estimated_duration_seconds": 180,
+  "description": "An agent runs a SQL trend query against the FDA documents corpus, pulls two recent representative documents, and uses a map call to extract how each frames the estimand discussion. Output is a year-by-year table plus a short narrative.",
+  "metadata": {
+    "tool_calls": 4,
+    "documents_read": 7,
+    "wall_clock_seconds": 168
+  },
+  "events": [
+    {
+      "type": "user_query",
+      "content": "Using SQL, count how many FDA documents per year mention 'estimand' or 'intercurrent event' from 2017 onward. Then pull 2 recent examples and explain how each frames the estimand discussion.",
+      "delay_ms": 0
+    },
+    {
+      "type": "agent_thought",
+      "content": "I'll start with a SQL query over the FDA documents — that gives me the year-by-year counts. Then I'll grab two recent ones and run a map to extract how the estimand is framed.",
+      "delay_ms": 900
+    },
+    {
+      "type": "tool_call",
+      "tool_name": "paperclip sql",
+      "args": "SELECT pub_year, COUNT(*) AS n\nFROM documents\nWHERE source = 'fda'\n  AND pub_year >= 2017\n  AND (abstract_text ILIKE '%estimand%' OR abstract_text ILIKE '%intercurrent event%')\nGROUP BY pub_year\nORDER BY pub_year;",
+      "delay_ms": 1200
+    },
+    {
+      "type": "tool_output",
+      "format": "code",
+      "content": " pub_year |  n\n----------+-----\n     2017 |   3\n     2018 |   8\n     2019 |  14\n     2020 |  19\n     2021 |  28\n     2022 |  34\n     2023 |  41\n     2024 |  47\n(8 rows)\n\nQuery returned 8 rows in 0.14s.",
+      "delay_ms": 1800
+    },
+    {
+      "type": "agent_thought",
+      "content": "Clear upward trend — roughly 15× growth from 2017 to 2024. Let me pull two recent representative documents to see how reviewers are actually using the term.",
+      "delay_ms": 1000
+    },
+    {
+      "type": "tool_call",
+      "tool_name": "paperclip search",
+      "args": "paperclip search \"estimand intercurrent event\" -s fda -n 5",
+      "delay_ms": 800
+    },
+    {
+      "type": "tool_output",
+      "format": "text",
+      "content": "Found 5 documents  [s_4a2b61f6]\n\n  1. Statistical Review and Evaluation — BLA 761346\n     Clinical Studies for a PD-1 Inhibitor in Advanced NSCLC\n     fda_us_761346_statr · fda · 2024-08-12\n\n  2. Multi-Disciplinary Review — NDA 217194\n     Once-Weekly GLP-1 Receptor Agonist for Type 2 Diabetes\n     fda_us_217194_mdr · fda · 2024-05-30\n\n  3. Statistical Review — NDA 215834\n     SGLT2 Inhibitor in Heart Failure with Preserved Ejection Fraction\n     fda_us_215834_statr · fda · 2024-03-21\n\n  4. Advisory Committee Briefing Document — BLA 125514/S-115\n     Adjuvant Therapy for Resected Melanoma\n     fda_us_125514_ac · fda · 2023-11-14\n\n  5. Clinical Review — NDA 216687\n     Targeted Therapy for KRAS G12C-Mutated NSCLC\n     fda_us_216687_clinr · fda · 2023-09-08",
+      "delay_ms": 2000
+    },
+    {
+      "type": "agent_thought",
+      "content": "I'll take the top two — both are 2024 reviews — and ask the model how each frames the estimand and what intercurrent events the sponsor handled.",
+      "delay_ms": 900
+    },
+    {
+      "type": "tool_call",
+      "tool_name": "paperclip map",
+      "args": "paperclip map --from s_4a2b61f6 -n 2 \\\n  \"How does this document frame the estimand? Which intercurrent events does it address, and what strategy is used (treatment policy, hypothetical, composite, while-on-treatment, principal stratum)?\"",
+      "delay_ms": 700
+    },
+    {
+      "type": "tool_output",
+      "format": "text",
+      "content": "Map complete: 2/2 documents  [m_b7c4e103]\n\n  ✓ Statistical Review and Evaluation — BLA 761346 (PD-1 / NSCLC)\n    Primary estimand: difference in overall survival between\n    treatment arms in the ITT population. Intercurrent events\n    addressed: (1) treatment discontinuation due to AEs —\n    treatment-policy strategy; (2) subsequent anti-cancer therapy\n    — treatment-policy strategy; (3) death — composite endpoint\n    (incorporated in OS). The reviewer flags that the sponsor's\n    sensitivity analysis using a hypothetical strategy for\n    subsequent therapy produced a 0.07 absolute HR shift, which\n    the reviewer considers \"within the range expected for this\n    indication and not indicative of estimand sensitivity.\"\n\n  ✓ Multi-Disciplinary Review — NDA 217194 (GLP-1 / T2DM)\n    Primary estimand: difference in HbA1c change from baseline\n    to week 52 if all subjects had remained on randomized\n    treatment (hypothetical strategy for rescue therapy and\n    discontinuation). Intercurrent events: (1) initiation of\n    rescue glucose-lowering medication — hypothetical strategy;\n    (2) treatment discontinuation — hypothetical strategy;\n    (3) pregnancy — while-on-treatment. The reviewer notes a\n    preference for a treatment-policy sensitivity analysis and\n    requests this in any future supplemental submission.",
+      "delay_ms": 2500
+    },
+    {
+      "type": "final_synthesis",
+      "format": "markdown",
+      "content": "## Findings\n\nFDA documents mentioning *estimand* or *intercurrent event* have grown from **3 in 2017** to **47 in 2024** — roughly a 15× increase over the period, broadly consistent with the post-ICH E9(R1) uptake curve seen in EMA scientific advice.\n\n### Year-by-year counts\n\n| Year | Documents mentioning estimand / IE |\n| ---: | ---: |\n| 2017 | 3 |\n| 2018 | 8 |\n| 2019 | 14 |\n| 2020 | 19 |\n| 2021 | 28 |\n| 2022 | 34 |\n| 2023 | 41 |\n| 2024 | 47 |\n\n### How two recent FDA reviews frame the estimand\n\n**BLA 761346 — PD-1 inhibitor in advanced NSCLC (Aug 2024).** Primary estimand is the difference in OS in the ITT population. Three intercurrent events are addressed, with the *treatment-policy* strategy used for both discontinuation and subsequent anti-cancer therapy; death is folded into the composite OS endpoint. The reviewer accepts a hypothetical-strategy sensitivity analysis, characterizing a 0.07 HR shift as expected for the indication.\n\n**NDA 217194 — GLP-1 receptor agonist for T2DM (May 2024).** Primary estimand uses the *hypothetical* strategy for both rescue medication and discontinuation — a deliberately efficacy-oriented framing. The reviewer pushes back gently and requests a treatment-policy sensitivity analysis in future supplements, signaling a preference for estimands that more closely reflect on-market use.\n\n### What this suggests\n\nThe vocabulary is now standard in FDA statistical reviews, but strategy choice is contested document-by-document. The 2024 reviews above show one accepted treatment-policy framing (oncology / OS) and one hypothetical framing where the reviewer asks for a treatment-policy companion — consistent with a pattern of FDA preferring treatment-policy estimands when they more closely match the labeling claim.\n\n*Documents read: 7. Wall clock: 168 seconds.*",
+      "delay_ms": 1400
+    }
+  ]
+}

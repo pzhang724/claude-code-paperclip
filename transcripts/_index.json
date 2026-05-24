@@ -1,0 +1,25 @@
+{
+  "sessions": [
+    {
+      "id": "01-estimand-trend",
+      "title": "How often do FDA documents mention 'estimand' over time?",
+      "subtitle": "Quantitative regulatory trend analysis",
+      "audience_tags": ["biostatistician", "regulatory"],
+      "estimated_duration_seconds": 180
+    },
+    {
+      "id": "02-pd-l1-fda-deep-dive",
+      "title": "What statistical concerns has FDA raised about PD-L1 inhibitors?",
+      "subtitle": "Reviewer-language extraction from BLA review documents",
+      "audience_tags": ["biostatistician", "medical writer", "regulatory"],
+      "estimated_duration_seconds": 240
+    },
+    {
+      "id": "03-glp-1-landscape",
+      "title": "Build a competitive landscape for GLP-1 receptor agonists",
+      "subtitle": "Parallel searches across literature, trials, and FDA",
+      "audience_tags": ["clinical operations", "medical writer", "regulatory"],
+      "estimated_duration_seconds": 300
+    }
+  ]
+}

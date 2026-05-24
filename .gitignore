@@ -1,0 +1,29 @@
+# R session
+.Rproj.user/
+.Rhistory
+.Rdata
+.RData
+.Ruserdata
+*.Rproj
+
+# renv: keep lockfile + settings, ignore the per-machine library
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/staging/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Shiny/Posit local
+rsconnect/
+manifest.json.bak
